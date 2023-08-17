@@ -146,5 +146,45 @@ public:
   Expect<uint32_t> body(const Runtime::CallingFrame& frame, uint64_t avformat_context);
 };
 
+class WasmEdgeFfmpegAvPacket : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvPacket> {
+public:
+  WasmEdgeFfmpegAvPacket(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<uint64_t> body(const Runtime::CallingFrame& frame);
+};
+
+class WasmEdgeFfmpegAvReadFrame : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvReadFrame> {
+public:
+  WasmEdgeFfmpegAvReadFrame(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<uint32_t> body(const Runtime::CallingFrame& frame, uint64_t avformat_context, uint64_t avpacket);
+};
+
+class WasmEdgeFfmpegAvPacketUnref : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvPacketUnref> {
+public:
+  WasmEdgeFfmpegAvPacketUnref(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<void> body(const Runtime::CallingFrame& frame, uint64_t avpacket);
+};
+
+class WasmEdgeFfmpegAvPacketStreamIndex : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvPacketStreamIndex> {
+public:
+  WasmEdgeFfmpegAvPacketStreamIndex(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<uint32_t> body(const Runtime::CallingFrame& frame, uint64_t avpacket);
+};
+
+class WasmEdgeFfmpegCopyPacket : public WasmEdgeFfmpeg<WasmEdgeFfmpegCopyPacket> {
+public:
+  WasmEdgeFfmpegCopyPacket(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<void> body(const Runtime::CallingFrame& frame, uint64_t input_avformat_context, uint64_t output_avformat_context, uint64_t avpacket, uint32_t streams_list_index);
+};
+
 } // namespace Host
 } // namespace WasmEdge

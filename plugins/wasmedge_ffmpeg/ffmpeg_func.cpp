@@ -8,6 +8,7 @@ extern "C" {
   #include <libavformat/avformat.h>
   #include <libavformat/avio.h>
   #include <libavutil/mem.h>
+  #include <libavutil/mathematics.h>
 }
 
 #include "common/defines.h"
@@ -269,6 +270,88 @@ Expect<uint32_t> WasmEdgeFfmpegAvFormatWriteHeader::body(const Runtime::CallingF
 
   return 0;
 }
+
+Expect<uint64_t> WasmEdgeFfmpegAvPacket::body(const Runtime::CallingFrame& frame) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVPacket* p_packet = new AVPacket();
+
+  return reinterpret_cast<uintptr_t>(p_packet);
+}
+
+Expect<uint32_t> WasmEdgeFfmpegAvReadFrame::body(const Runtime::CallingFrame& frame, uint64_t avformat_context, uint64_t avpacket) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
+  AVPacket* p_packet = reinterpret_cast<AVPacket*>(avpacket);
+
+  int ret = av_read_frame(p_avformat_context, p_packet);
+
+  std::cout << p_packet << std::endl;
+  if (ret < 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+Expect<uint32_t> WasmEdgeFfmpegAvPacketStreamIndex::body(const Runtime::CallingFrame& frame, uint64_t avpacket) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVPacket* p_packet = reinterpret_cast<AVPacket*>(avpacket);
+
+  return p_packet->stream_index;
+}
+
+Expect<void> WasmEdgeFfmpegAvPacketUnref::body(const Runtime::CallingFrame& frame, uint64_t avpacket) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVPacket* p_packet = reinterpret_cast<AVPacket*>(avpacket);
+  av_packet_unref(p_packet);
+
+  return {};
+}
+
+Expect<void> WasmEdgeFfmpegCopyPacket::body(const Runtime::CallingFrame& frame, uint64_t input_avformat_context, uint64_t output_avformat_context, uint64_t avpacket, uint32_t streams_list_index) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVRounding rounding;
+  rounding = static_cast<AVRounding>(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX);
+
+  AVFormatContext* p_input_avformat_context = reinterpret_cast<AVFormatContext*>(input_avformat_context);
+  AVFormatContext* p_output_avformat_context = reinterpret_cast<AVFormatContext*>(output_avformat_context);
+  AVPacket* p_packet = reinterpret_cast<AVPacket*>(avpacket);
+  AVStream *in_stream, *out_stream;
+
+  in_stream = p_input_avformat_context->streams[p_packet->stream_index];
+  out_stream = p_output_avformat_context->streams[p_packet->stream_index];
+
+  p_packet->stream_index = streams_list_index;
+  p_packet->pts = av_rescale_q_rnd(p_packet->pts, in_stream->time_base, out_stream->time_base, rounding);
+  p_packet->dts = av_rescale_q_rnd(p_packet->dts, in_stream->time_base, out_stream->time_base, rounding);
+  p_packet->duration = av_rescale_q(p_packet->duration, in_stream->time_base, out_stream->time_base);
+  p_packet->pos = -1;
+
+  std::cout << p_packet->stream_index << " " << p_packet->duration << std::endl;
+
+  return {};
+}
+
 
 } // namespace Host
 } // namespace WasmEdge

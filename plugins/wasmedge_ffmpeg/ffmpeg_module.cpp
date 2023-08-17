@@ -25,6 +25,12 @@ WasmEdgeFfmpegModule::WasmEdgeFfmpegModule() : ModuleInstance("wasmedge_ffmpeg")
   addHostFunc("wasmedge_ffmpeg_avcodec_params_copy", std::make_unique<WasmEdgeFfmpegAvCodecParamsCopy>(env));
 
   addHostFunc("wasmedge_ffmpeg_av_dump_format", std::make_unique<WasmEdgeFfmpegAvDumpFormat>(env));
+  addHostFunc("wasmedge_ffmpeg_av_read_frame", std::make_unique<WasmEdgeFfmpegAvReadFrame>(env));
+  addHostFunc("wasmedge_ffmpeg_av_packet", std::make_unique<WasmEdgeFfmpegAvPacket>(env));
+  addHostFunc("wasmedge_ffmpeg_av_packet_stream_index", std::make_unique<WasmEdgeFfmpegAvPacketStreamIndex>(env));
+  addHostFunc("wasmedge_ffmpeg_av_packet_unref", std::make_unique<WasmEdgeFfmpegAvPacketUnref>(env));
+
+  addHostFunc("wasmedge_ffmpeg_copy_packet", std::make_unique<WasmEdgeFfmpegCopyPacket>(env));
 
   addHostFunc("wasmedge_ffmpeg_avio_open", std::make_unique<WasmEdgeFfmpegAvioOpen>(env));
 
