@@ -20,6 +20,7 @@ WasmEdgeFfmpegModule::WasmEdgeFfmpegModule() : ModuleInstance("wasmedge_ffmpeg")
   addHostFunc("wasmedge_ffmpeg_avformat_alloc_output_context2", std::make_unique<WasmEdgeFfmpegAvFormatAllocOutputContext2>(env));
   addHostFunc("wasmedge_ffmpeg_avformat_write_header", std::make_unique<WasmEdgeFfmpegAvFormatWriteHeader>(env));
   addHostFunc("wasmedge_ffmpeg_avformat_new_stream", std::make_unique<WasmEdgeFfmpegAvFormatNewStream>(env));
+  addHostFunc("wasmedge_ffmpeg_avformat_close_input", std::make_unique<WasmEdgeFfmpegAvFormatCloseInput>(env));
 
   addHostFunc("wasmedge_ffmpeg_avcodec_params_codec_type", std::make_unique<WasmEdgeFfmpegAvCodecParamsCodecType>(env));
   addHostFunc("wasmedge_ffmpeg_avcodec_params_copy", std::make_unique<WasmEdgeFfmpegAvCodecParamsCopy>(env));
@@ -29,10 +30,13 @@ WasmEdgeFfmpegModule::WasmEdgeFfmpegModule() : ModuleInstance("wasmedge_ffmpeg")
   addHostFunc("wasmedge_ffmpeg_av_packet", std::make_unique<WasmEdgeFfmpegAvPacket>(env));
   addHostFunc("wasmedge_ffmpeg_av_packet_stream_index", std::make_unique<WasmEdgeFfmpegAvPacketStreamIndex>(env));
   addHostFunc("wasmedge_ffmpeg_av_packet_unref", std::make_unique<WasmEdgeFfmpegAvPacketUnref>(env));
+  addHostFunc("wasmedge_ffmpeg_av_interleaved_write_frame", std::make_unique<WasmEdgeFfmpegAvInterleavedWriteFrame>(env));
+  addHostFunc("wasmedge_ffmpeg_av_write_trailer", std::make_unique<WasmEdgeFfmpegAvWriteTrailer>(env));
 
   addHostFunc("wasmedge_ffmpeg_copy_packet", std::make_unique<WasmEdgeFfmpegCopyPacket>(env));
 
   addHostFunc("wasmedge_ffmpeg_avio_open", std::make_unique<WasmEdgeFfmpegAvioOpen>(env));
+  addHostFunc("wasmedge_ffmpeg_avio_closep", std::make_unique<WasmEdgeFfmpegAvioClosep>(env));
 
   addHostFunc("wasmedge_ffmpeg_avstream_codecpar", std::make_unique<WasmEdgeFfmpegAvStreamCodecpar>(env));
 }

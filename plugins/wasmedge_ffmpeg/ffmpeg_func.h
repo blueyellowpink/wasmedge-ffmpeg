@@ -186,5 +186,37 @@ public:
   Expect<void> body(const Runtime::CallingFrame& frame, uint64_t input_avformat_context, uint64_t output_avformat_context, uint64_t avpacket, uint32_t streams_list_index);
 };
 
+class WasmEdgeFfmpegAvInterleavedWriteFrame : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvInterleavedWriteFrame> {
+public:
+  WasmEdgeFfmpegAvInterleavedWriteFrame(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<uint32_t> body(const Runtime::CallingFrame& frame, uint64_t avformat_context, uint64_t avpacket);
+};
+
+class WasmEdgeFfmpegAvWriteTrailer : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvWriteTrailer> {
+public:
+  WasmEdgeFfmpegAvWriteTrailer(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<uint32_t> body(const Runtime::CallingFrame& frame, uint64_t avformat_context);
+};
+
+class WasmEdgeFfmpegAvFormatCloseInput : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvFormatCloseInput> {
+public:
+  WasmEdgeFfmpegAvFormatCloseInput(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<void> body(const Runtime::CallingFrame& frame, uint64_t avformat_context);
+};
+
+class WasmEdgeFfmpegAvioClosep : public WasmEdgeFfmpeg<WasmEdgeFfmpegAvioClosep> {
+public:
+  WasmEdgeFfmpegAvioClosep(WasmEdgeFfmpegEnvironment& host_env)
+  : WasmEdgeFfmpeg(host_env) {}
+
+  Expect<void> body(const Runtime::CallingFrame& frame, uint64_t avformat_context);
+};
+
 } // namespace Host
 } // namespace WasmEdge

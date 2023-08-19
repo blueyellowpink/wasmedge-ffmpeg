@@ -45,7 +45,6 @@ Expect<uint64_t> WasmEdgeFfmpegAvFormatAllocContext::body(const Runtime::Calling
   }
 
   AVFormatContext* p_format_context = avformat_alloc_context();
-  std::cout << p_format_context << std::endl;
 
   return reinterpret_cast<uintptr_t>(p_format_context);
 }
@@ -69,9 +68,6 @@ Expect<uint64_t> WasmEdgeFfmpegAvFormatGetContext::body(const Runtime::CallingFr
   }
 
   AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
-
-  /* AVFormatContext* p_avformat_context = mem_instance->getPointer<AVFormatContext*>(context_ptr); */
-  /* std::cout << p_avformat_context << std::endl; */
 
   return p_avformat_context->event_flags;
 }
@@ -212,12 +208,6 @@ Expect<void> WasmEdgeFfmpegAvDumpFormat::body(const Runtime::CallingFrame& frame
   }
 
   AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
-  std::cout << p_avformat_context << std::endl;
-  std::cout << p_avformat_context->nb_streams << std::endl;
-  std::cout << p_avformat_context->oformat->name << std::endl;
-  std::cout << p_avformat_context->metadata << std::endl;
-  std::cout << p_avformat_context->nb_programs << std::endl;
-  std::cout << p_avformat_context->nb_chapters << std::endl;
 
   char* m_buffer = mem_instance->getPointer<char*>(file_name);
   std::string m_output_file_name;
@@ -227,11 +217,7 @@ Expect<void> WasmEdgeFfmpegAvDumpFormat::body(const Runtime::CallingFrame& frame
   int m_index = static_cast<int>(index);
   int m_is_output = static_cast<int>(is_output);
 
-  std::cout << m_index << std::endl;
-  std::cout << m_is_output << std::endl;
-  std::cout << m_output_file_name << std::endl;
-
-  /* av_dump_format(p_avformat_context, m_index, m_output_file_name.c_str(), m_is_output); */
+  av_dump_format(p_avformat_context, m_index, m_output_file_name.c_str(), m_is_output);
 
   return {};
 }
@@ -292,8 +278,6 @@ Expect<uint32_t> WasmEdgeFfmpegAvReadFrame::body(const Runtime::CallingFrame& fr
   AVPacket* p_packet = reinterpret_cast<AVPacket*>(avpacket);
 
   int ret = av_read_frame(p_avformat_context, p_packet);
-
-  std::cout << p_packet << std::endl;
   if (ret < 0) {
     return 1;
   }
@@ -347,11 +331,67 @@ Expect<void> WasmEdgeFfmpegCopyPacket::body(const Runtime::CallingFrame& frame, 
   p_packet->duration = av_rescale_q(p_packet->duration, in_stream->time_base, out_stream->time_base);
   p_packet->pos = -1;
 
-  std::cout << p_packet->stream_index << " " << p_packet->duration << std::endl;
+  return {};
+}
+
+Expect<uint32_t> WasmEdgeFfmpegAvInterleavedWriteFrame::body(const Runtime::CallingFrame& frame, uint64_t avformat_context, uint64_t avpacket) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
+  AVPacket* p_packet = reinterpret_cast<AVPacket*>(avpacket);
+
+  int ret = av_interleaved_write_frame(p_avformat_context, p_packet);
+  if (ret < 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+Expect<uint32_t> WasmEdgeFfmpegAvWriteTrailer::body(const Runtime::CallingFrame& frame, uint64_t avformat_context) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
+
+  int ret = av_write_trailer(p_avformat_context);
+  if (ret < 0) {
+    return 1;
+  }
+
+  return 0;
+}
+
+Expect<void> WasmEdgeFfmpegAvFormatCloseInput::body(const Runtime::CallingFrame& frame, uint64_t avformat_context) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
+
+  avformat_close_input(&p_avformat_context);
 
   return {};
 }
 
+Expect<void> WasmEdgeFfmpegAvioClosep::body(const Runtime::CallingFrame& frame, uint64_t avformat_context) {
+  auto* mem_instance = frame.getMemoryByIndex(0);
+  if (mem_instance == nullptr) {
+    return Unexpect(ErrCode::Value::HostFuncError);
+  }
+
+  AVFormatContext* p_avformat_context = reinterpret_cast<AVFormatContext*>(avformat_context);
+
+  avio_closep(&p_avformat_context->pb);
+
+  return {};
+}
 
 } // namespace Host
 } // namespace WasmEdge
